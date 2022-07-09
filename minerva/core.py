@@ -4,6 +4,7 @@ from itertools import tee
 
 from amaranth import *
 from amaranth.lib.coding import PriorityEncoder
+from minerva.units.mcycle import McycleUnit
 
 from .isa import *
 from .stage import *
@@ -264,6 +265,9 @@ class Minerva(Elaboratable):
         if with_trigger:
             self._csrf.add_csrs(self._trigger.iter_csrs())
 
+        self._mcycle = McycleUnit()
+        self._csrf.add_csrs(self._mcycle.iter_csrs())
+
     def elaborate(self, platform):
         cpu = Module()
 
@@ -315,6 +319,8 @@ class Minerva(Elaboratable):
         csrf_rp = self._csrf.read_port()
         csrf_wp = self._csrf.write_port()
 
+        cpu.submodules.mcycle = self._mcycle
+        
         # Pipeline logic
 
         cpu.d.comb += [
